@@ -420,10 +420,10 @@ app.post('/notice/deleteProcess', function(request, response){
 
 app.get('/equipment/management/main', function(request, response){
 	if(request.session.user) {
-      response.render('equipment.ejs', {name:request.session.user.name});
-   } else {
-      response.redirect('/');
-   }
+		response.render('equipment.ejs', {name:request.session.user.name});
+	} else {
+		response.redirect('/');
+	}
 });
 
 app.get('/equipment/management/register', function(request, response){
@@ -499,12 +499,6 @@ app.post('/equipment/management/registerProcess', function(request, response){
 			}	
 		});
 	});
-	//request.session.qrcode=body.test;//serial, equipment name save
-	/*
-		equipment input
-		request.session.qrcode input(serial num)
-		redirect registerResult
-	 */
 });
 app.get('/equipment/registerResult', function(request, response){
 	var qrcode=request.session.qrcode;
