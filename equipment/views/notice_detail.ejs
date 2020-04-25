@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<script src="js/jquery.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<head>
+	<title>과업지향</title>
+</head>
+<body>
+	<p> 
+      <h2>
+         <a href="/">과업지향</a>
+         <a href="/notice/main">공지사항</a>
+      <% if(locals.name){ %>
+         <%=name%>님
+         <a href="/logout">로그아웃</a>
+      <%} else {%>
+         <a href="/signup">회원가입</a>
+         <a href="/login">로그인</a>
+      <%}%>
+      </h2>
+   </p>
+	<form action="/notice/modifyProcess" method="POST">
+		<p>
+			제목 <input type="text" id="title" name="title" value="<%=result.notice_title%>" readonly>
+			작성자 <input type="text" value="<%=result.user_name%>" readonly>
+		</p>
+		<p>
+			작성일 <input type="text" value="<%=result.reporting_date%>" readonly>
+		</p>
+		<p>
+			내용 <textarea id="content" name="content" cols="40" rows="8" readonly="readonly"><%=result.notice_content%></textarea>
+		</p>
+		<p>
+			<input type="button" id="hiddenList" value="목록" onclick="location.href='/notice/main'" hidden>
+			<input type="submit" id="hiddenModify" value="수정완료" hidden>
+			<input type="text" id="noticeID" name="noticeID" value="<%=noticeID%>" hidden>
+		</P>
+	</form>
+	<p>
+	<% if(locals.name) {%>
+		<form action="/notice/deleteProcess" method="POST">
+			<input type="submit" id="delete" value="삭제">
+			<input type="text" name="noticeID" value="<%=noticeID%>" hidden>
+	<%}%>
+		<input type="button" id="list" value="목록" onclick="location.href='/notice/main'">
+	<% if(locals.name) {%>
+		<input type="button" id="modify" value="수정">
+	<%}%>
+		</form>
+	</p>
+</body>
+<script>
+$('#modify').on('click', function(){
+	$('#title').attr("readonly", false);
+	$('#content').attr("readonly", false);
+	$('#delete').attr("hidden", true);
+	$('#list').attr("hidden", true);
+	$('#modify').attr("hidden", true);
+	$('#hiddenList').attr("hidden", false);
+	$('#hiddenModify').attr("hidden", false);
+});
+</script>
+</html>

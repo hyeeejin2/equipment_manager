@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>과업지향</title> 
+</head>
+<body>
+	<p>
+		<h2>
+		<% if(locals.name){ %>
+			<a href="/">과업지향</a>
+         <a href="/notice/main">공지사항</a>
+         <%=name%>님
+         <a href="/logout">로그아웃</a>
+		<%}%>
+		</h2>
+	</p>
+	<p>
+		<a href="/equipment/management/register">비품 등록</a>
+	</p>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+	<script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+	<script src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.css">
+   <link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css">
+	<title>과업지향</title>
+</head>
+<body>
+	<p>
+		<h2>
+			<a href="/">과업지향</a>
+			<a href="/notice/main">공지사항</a>
+		<% if(locals.name){ %>
+			<%=name%>님
+			<a href="/logout">로그아웃</a>
+		<%} else {%>
+			<a href="/signup">회원가입</a>
+		        <a href="/login">로그인</a>
+		<%}%>
+		</h2>
+	</p>
+	<p>
+		<h2>공지 사항</h2>
+	</p>
+	<table id="noticeList" class="table table-striped table-bordered" style="width:100%">
+		<thead>
+			<tr>
+				<th>번호</th>
+				<th>제목</th>
+				<th>작성자</th>
+				<th>작성일</th>
+				<th>조회수</th>
+			</tr>
+	</table>
+	<%if(locals.name){%>
+	<p>
+		<input type="button" value="글쓰기" onclick="location.href='/notice/write'">
+	</p>
+	<%}%>
+</body>
+<script>
+var table=$('#noticeList').DataTable({
+   ajax:{
+	url:'http://49.50.172.95/notice/listProcess',
+     	dataSrc:'data'
+   },
+	columns:[{data:'notice_num'},
+		 {data:'notice_title'},
+     		 {data:'user_name'},
+        	 {data:'reporting_date'},
+	         {data:'views'}]
+});
+$('#noticeList').on('click', 'tr', function(){
+	var noticeID=table.row(this).data().notice_num;
+	location.href=`/notice/detail/${noticeID}`;
+});
+</script>
+</html>

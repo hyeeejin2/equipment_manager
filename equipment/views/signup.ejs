@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<script type ="text/javascript">
+function nullCheck(){
+        var thisForm=document.getElementById("signup");
+        var count=0;
+        for(var i=0; i<thisForm.length;i++){
+                if(thisForm[i].value=="" || thisForm[i].value==null){
+                        count++;
+                        break;
+                }
+        }
+        if(count>0){
+                alert("빈칸을 채워주세요.");
+                return false;
+        } else {
+                return true;
+        }
+}
+</script>
+<head>
+	<title>회원가입</title>
+</head>
+<body>
+	<p>
+		<h2>
+			<a href="/">과업지향</a>
+			<a href="/notice/main">공지사항</a>
+			<a href="/signup">회원가입</a>
+  	      <a href="/login">로그인</a>
+		</h2>
+	</p>
+	<form id="signup" action="/signupProcess" method="POST" onsubmit="return nullCheck();">
+		<p>
+			<h2>회원가입</h2>
+		</p>
+		<p>아이디 <input type="text" name="id"></p>
+		<p>비밀번호 <input type="password" name="pw"></p>
+		<p>비밀번호 확인 <input type="password" name="pwCheck"></p>
+		<p>이메일 <input type="email" name="email"></p>
+		<p>이름 <input type="text" name="name"></p>
+		<p>회사 
+			<select name="company">
+				<option value="1">i-Keeper</option>
+			</select>
+		</p>
+      <p>부서 
+			<select name="department">
+				<option value="1">Team Production</option>
+				<option value="2">Team Engineer</option>
+				<option value="3">Team Business</option>
+				<option value="4">Team Promotion</option>
+			</select>
+		</p>
+      <p>직책 
+			<select name="position">
+				<option value="1">Manager</option>
+				<option value="2">Chief</option>
+				<option value="3">Staff</option>
+				<option value="4">Intern</option>
+			</select>
+		</p>
+		<p>mac 주소 <input type="text" name="mac"></p>
+      <p>
+			<input type="reset" value="다시 입력">
+			<input type="submit" value="회원가입">
+		</p>
+	</form>
+</body>
+</html>

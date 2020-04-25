@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<script type="text/javascript">
+	$(document).ready(function(){
+		var date=new Date();
+		$('#currentDate').val(date);
+	});
+	document.getElementById('currentDate').valueAsDate=new Date();
+	function nullCheck(){
+         var thisForm=document.getElementById("write");
+         var count=0;
+         for(var i=0; i<thisForm.length;i++){
+            if(thisForm[i].value=="" || thisForm[i].value==null){
+               count++;
+               break;
+            }
+         }
+         if(count>0){
+            alert("빈칸을 채워주세요.");
+            return false;
+         } else {
+            return true;
+         }
+      }
+</script>
+<head>
+	<title>과업지향</title>
+</head>
+<body>
+	<p>
+		<h2>
+			<a href="/">과업지향</a>
+			<a href="/notice/main">공지 사항</a>
+		<% if(locals.name){ %>
+         <%=name%>님
+         <a href="/logout">로그아웃</a>
+      <%} else {%>
+         <a href="/signup">회원가입</a>
+         <a href="/login">로그인</a>
+      <%}%>
+		</h2>
+	</p>
+	<form id="write" action="/notice/writeProcess" method="post" onsubmit="return nullCheck();">
+		<p>
+			제목 <input type="text" name="title">
+			작성자 <input type="text" name="id" value="<%=name%>" readonly>
+		</p>
+		<p>
+			날짜 <input type="text" name="date" value="<%=date%>" readonly>
+		</p>
+		<p>
+			내용 <textarea name="content" cols="40" rows="8"></textarea>
+		</p>
+		<p>
+			<input type="reset" value="다시 입력">
+			<input type="button" value="목록" onclick="location.href='/notice/main'">
+			<input type="submit" value="등록">
+		</p>
+</body>
+</html>

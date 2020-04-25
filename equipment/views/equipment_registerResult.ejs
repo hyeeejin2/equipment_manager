@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<title>과업지향</title>
+</head>
+<p>
+	<h2>
+	<% if(locals.name){ %>
+		<a href="/">과업지향</a>
+		<a href="/notice/main">공지사항</a>
+		<%=name%>님
+		<a href="/logout">로그아웃</a>
+	<%}%>
+	</h2>
+</p>
+<% if(locals.equipmentName && locals.equipmentNum){ %>
+<div>
+	<h3> 
+		<%=equipmentName%> (이/가) 등록 되었습니다.
+	</h3>
+</div>
+<div id="printArea">
+	<img src='./images/<%=equipmentNum%>.png'/>
+</div>
+<div>
+	<input type="button" id="print" value="출력">
+</div>
+<%}%>
+</body>
+<script>
+$('#print').on("click", function(){
+	const completeParam = makeHtml();
+	reportPrint(completeParam);
+});
+function makeHtml(){
+	const obj = {html : ''};
+	let html = '<div class="printArea">';
+	html += '<h1><%=equipmentName%>의 QRCode</h1>';
+	html += "<img src='./images/<%=equipmentName%>.png'/>";
+	html += '</div>';
+	obj.html = html;
+	return obj;
+};
+function reportPrint(param){
+	const setting = "width=890, height=841";
+	const objWin = window.open('', 'print', setting);
+	objWin.document.open();
+	objWin.document.write('<html><head><title>QRCode</title>');
+	objWin.document.write('</head><body>');
+	objWin.document.write(param.html);
+	objWin.document.write('</body></html>');
+	objWin.focus();
+	objWin.document.close();
+	setTimeout(function(){objWin.print();objWin.close();}, 1000);
+};
+</script>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<script type ="text/javascript">
+	function nullCheck(){
+		var thisForm=document.getElementById("login");
+		var count=0;
+		for(var i=0; i<thisForm.length;i++){
+			if(thisForm[i].value=="" || thisForm[i].value==null){
+				count++;
+				break;
+			}
+		}
+		if(count>0){
+			alert("빈칸을 채워주세요.");
+			return false;
+		} else {
+			return true;
+		}
+	}
+</script>
+<head>
+	<title>로그인</title>
+</head>
+<body>
+	<p>
+		<h2>
+			<a href="/">과업지향</a>
+			<a href="/notice/main">공지사항</a>
+			<a href="/signup">회원가입</a>
+			<a href="/login">로그인</a>
+		</h2>
+	</p>
+	<form id="login" action="/loginProcess" method="POST" onsubmit="return nullCheck();">
+		<p>
+			<h2>로그인</h2>
+		</p>
+		<p>아이디 <input type="text" name="id"></p>
+		<p>비밀번호 <input type="password" name="pw"></p>
+		<p><input type="submit" value="로그인"></p>
+	</form>
+</body>
+</html>

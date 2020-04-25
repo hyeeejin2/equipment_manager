@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<script type ="text/javascript">
+function nullCheck(){
+	var thisForm=document.getElementById("register");
+	var count=0;
+	for(var i=0; i<thisForm.length;i++){
+		if(thisForm[i].value=="" || thisForm[i].value==null){
+			count++;
+		        break;
+                }
+        }
+	if(count>0){
+		alert("빈칸을 채워주세요.");
+                return false;
+        } else {
+		return true;
+        }
+}
+</script>
+<head>
+   <title>과업지향</title> 
+</head>
+<body>
+   <p> 
+      <h2>
+      <% if(locals.name){ %>
+         <a href="/">과업지향</a>
+         <a href="/notice/main">공지사항</a>
+         <%=name%>님
+         <a href="/logout">로그아웃</a>
+      <%}%>
+      </h2>
+   </p>
+   <p> 
+      <a href="/equipment/management/register">비품 등록</a>
+	</p>
+	<form id="register" action="/equipment/management/registerProcess" method="POST" enctype="multipart/form-data" onsubmit="return nullCheck();">
+		<p>
+			분류 <select name="kind">
+				<option value="1">Book</option>
+				<option value="2">Monitor</option>
+			</select>
+		</p>
+		<p>
+			비품명 <input type="text" name="name">
+		</p>
+		<p>
+			시리얼 번호 <input type="text" name="serial">
+		</p>
+		<p>
+			브랜드 <input type="text" name="brand">
+		</p>
+		<p>
+			정가 <input type="number" name="price">
+		</p>
+		<p>
+			구입 날짜 <input type="date" name="date">
+		</p>
+		<p>
+			비품 사진 <input type="file" name="file" accept="image/png"><h5>※png 만 지원</h5>
+		</p>
+		<p>
+			비고 <input type="text" name="remark">
+		</p>
+		<p>
+			<input type="reset" value="다시 입력">
+			<input type="submit" value="비품 등록">
+		</p>
+	</form>
+</body>
+</html>
+
