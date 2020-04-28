@@ -9,6 +9,7 @@ const mysql = require('mysql');
 const dateformat = require('dateformat');
 const QRCode = require('qrcode');
 const fileUpload = require('express-fileupload');
+const moment = require('moment');
 const logger=require('morgan');
 require('ejs');
 
@@ -230,14 +231,14 @@ app.get('/logout', function(request, response){
 
 app.get('/notice/main', function(request, response){
 	if(request.session.user) {
-      response.render('notice.ejs', {name:request.session.user.name});
-   } else {
-      response.render('notice.ejs');
-   }   
+		response.render('notice.ejs', {name:request.session.user.name});
+	} else {
+		response.render('notice.ejs');
+	}   
 });
 app.get('/notice/listProcess', function(request, response){
 	pool.getConnection(function(err, connection){
-		var sql='SELECT notice_title, user_name, reporting_date, views FROM NOTICE_INFO, USER_INFO WHERE USER_INFO.user_num=NOTICE_INFO.user_num';
+		var sql='SELECT notice_title, user_name, reporting_date, notice_content, views FROM NOTICE_INFO, USER_INFO WHERE USER_INFO.user_num=NOTICE_INFO.user_num';
 		connection.query(sql, function(err, result, fields){
 			if(err) {
 				connection.release();
@@ -252,7 +253,8 @@ app.get('/notice/listProcess', function(request, response){
 						'notice_title':result[i].notice_title,
 						'user_name':result[i].user_name,
 						'reporting_date':result[i].reporting_date,
-						'views':result[i].views
+						'views':result[i].views,
+						'notice_content':result[i].notice_content
 					};
 					dataList.push(temp);
 				}
@@ -311,68 +313,72 @@ app.get('/notice/detail/:noticeID', function(request, response){
 });
 
 app.get('/notice/write', function(request, response){
-   if(request.session.user) {
+	if(request.session.user) {
 		var date=dateformat(new Date(),'yyyy-mm-dd');
-      response.render('notice_write.ejs', {
+		response.render('notice_write.ejs', {
 			name:request.session.user.name,
 			date:date
 		});
-   } else {
-      response.redirect('/');
-   }
+	} else {
+		response.redirect('/');
+	}	
 });
 
 app.post('/notice/writeProcess', function(request, response){
-	var body=request.body;
-	var no=0;
-	var user=0;
+	if(request.session.user) {
+		var body=request.body;
+		var no=0;
+		var user=0;
 
-	pool.getConnection(function(err, connection){
-		var sql="SELECT count(*) AS count FROM NOTICE_INFO;";
-		connection.query(sql, function(err, result, fields){
-			if(err) {
-				connection.release();
-				response.send('error : '+err);
-			} else {
-				no=result[0].count+1;
-				sql="SELECT user_num FROM USER_INFO WHERE user_name=?;";
-				connection.query(sql, [body.id], function(err, result, fields){
-					if(err) {
-						connection.release();
-						response.send('error : '+err);
-					} else {
-						user=result[0].user_num;
-						sql="INSERT INTO NOTICE_INFO SET ?;";
-						var data={
-							'notice_num':no,
-							'c_num':1,
-							'user_num':user,
-							'notice_title':body.title,
-							'reporting_date':body.date,
-							'notice_content':body.content,
-							'views':0
-						};
-						connection.query(sql, data, function(err, result, fields){
-							if(err) {
-								connection.rollback();
-					                        connection.release();
-								response.send('error : '+err);
-							} else {
-								connection.commit();
-								connection.release();
-					                        response.redirect('/notice/main');
-							}
-						});
-					}
-				});
-			}
+		pool.getConnection(function(err, connection){
+			var sql="SELECT count(*) AS count FROM NOTICE_INFO;";
+			connection.query(sql, function(err, result, fields){
+				if(err) {
+					connection.release();
+					response.send('error : '+err);
+				} else {
+					no=result[0].count+1;
+					sql="SELECT user_num FROM USER_INFO WHERE user_name=?;";
+					connection.query(sql, [body.id], function(err, result, fields){
+						if(err) {
+							connection.release();
+							response.send('error : '+err);
+						} else {
+							user=result[0].user_num;
+							sql="INSERT INTO NOTICE_INFO SET ?;";
+							var data={
+								'notice_num':no,
+								'c_num':1,
+								'user_num':user,
+								'notice_title':body.title,
+								'reporting_date':body.date,
+								'notice_content':body.content,
+								'views':0
+							};
+							connection.query(sql, data, function(err, result, fields){
+								if(err) {
+									connection.rollback();
+					                	        connection.release();
+									response.send('error : '+err);
+								} else {
+									connection.commit();
+									connection.release();
+						                        response.redirect('/notice/main');
+								}
+							});
+						}
+					});
+				}
+			});
 		});
-	});
+	} else {
+		response.redirect('/');
+	}
 });
 
 
 app.post('/notice/modifyProcess', function(request, response){
-   if(request.session.user) {
+	if(request.session.user) {
 		var body=request.body;
 		var data=[body.title, body.content, body.noticeID];
 		console.log(data);
@@ -390,13 +396,13 @@ app.post('/notice/modifyProcess', function(request, response){
 				}
 			});
 		});
-   } else {
-      response.redirect('/');
-   }   
+	} else {
+		response.redirect('/');
+	}   
 });
 
 app.post('/notice/deleteProcess', function(request, response){
-   if(request.session.user) {
+	if(request.session.user) {
 		var noticeID=[request.body.noticeID];
 		console.log(request.body);
 		pool.getConnection(function(err, connection){
@@ -412,13 +418,13 @@ app.post('/notice/deleteProcess', function(request, response){
    				}
                		});
 		});
-   } else {
-      response.redirect('/');
-   }   
+	} else {
+		response.redirect('/');
+	}   
 });
 
 
-app.get('/equipment/management/main', function(request, response){
+app.get('/equipment/main', function(request, response){
 	if(request.session.user) {
 		response.render('equipment.ejs', {name:request.session.user.name});
 	} else {
@@ -426,104 +432,275 @@ app.get('/equipment/management/main', function(request, response){
 	}
 });
 
-app.get('/equipment/management/register', function(request, response){
+app.get('/equipment/detail/:equipmentID', function(request, response){
+	if(request.session.user){
+		var equipmentID=[request.params.equipmentID];
+		pool.getConnection(function(err, connection){
+        		var sql="SELECT EXISTS (SELECT * FROM EQUIPMENT_INFO WHERE EQUIPMENT_NUM=?) AS success;";
+	                connection.query(sql, equipmentID, function(err, result, fields){
+        	                if(err) {
+                	                connection.release();
+                        	        response.send('error : '+err);
+	                        } else {
+        	                        if(!result[0].success) {
+                	                        connection.release();
+                        	                response.redirect("/equipment/main");
+                                	} else {
+						sql="SELECT G_NAME, EQUIPMENT_NAME, EQUIPMENT_SERIAL, PUBLISHER_NAME, PURCHASE_PRICE, PURCHASE_DATE, REMARK FROM EQUIPMENT_INFO, GOODS WHERE EQUIPMENT_NUM=? AND GOODS.G_NUM=EQUIPMENT_INFO.G_NUM;";
+						connection.query(sql, equipmentID, function(err, result, fields){
+							if(err) {
+								connection.release();
+								response.send('error : '+err);
+							} else {
+								resultDetail=result[0];
+								sql="SELECT EXISTS (SELECT * FROM USER_EQUIPMENT_MAPPING WHERE EQUIPMENT_NUM=?) AS success;";
+								connection.query(sql, equipmentID, function(err, result, fields){
+									if(err) {
+										connection.release();
+										response.send('error : '+err);
+									} else {
+										if(!result[0].success) {
+											connection.release();
+											var state="대여가능";
+											response.render('equipment_detail', {
+	                	                                                        	name:request.session.user.name,
+	        	                	                                                result:resultDetail,
+        	        	                	                                        equipmentID:equipmentID,
+												rentalState:state,
+												rental:1
+                                                		                	});
+										} else {
+											sql="SELECT START_DATE, END_DATE FROM RENTAL_LOG WHERE EQUIPMENT_NUM=?;";
+											connection.query(sql, equipmentID, function(err, result, fiedls){
+												if(err) {
+													connection.release();
+													response.send('error : '+err);
+												} else {
+													connection.release();
+													var start=result[0].START_DATE;
+													var end=result[0].END_DATE;
+													var now=moment().format('YYYY-MM-DD');
+													if(moment(now).isBefore(end)) {
+														var state="대여중";
+														var day=moment(end).diff(moment(now), "days");	
+													 	response.render('equipment_detail', {
+                        	        	                                                                	name:request.session.user.name,
+	        		        	                                                                        result:resultDetail,
+		                                        	                                                        equipmentID:equipmentID,
+															rentalState:state,
+                        	                                		                                        rental:0,
+															startday:start,
+															returnday:end,
+															day:day,
+															overdue:false
+														});
+													} else {
+														var state="연체중";
+														var day=moment().diff(moment(end),"days");
+														response.render('equipment_detail', {
+                                                                                                                        name:request.session.user.name,
+                                                                                                                        result:resultDetail,
+                                                                                                                        equipmentID:equipmentID,
+                                                                                                                        rentalState:state,
+                                                                                                                        rental:0,
+															startday:start,
+															returnday:end,
+															day:day,
+															overdue:true
+                                                                                                                });
+													}
+												}
+											});
+										}
+									}
+								});
+							}
+						});
+					}
+                                }
+                        });
+                });
+        } else {
+		response.redirect('/');
+	}
+});
+
+app.get('/equipment/register', function(request, response){
 	if(request.session.user) {
 		response.render('equipment_register.ejs', {name:request.session.user.name});
 	} else {
 		response.redirect('/');
    	}
 });
-app.post('/equipment/management/registerProcess', function(request, response){
-	var body=request.body;
-	var file=request.files.file;
-	var no=0;
-	console.log(body);
-	console.log(file);
+app.post('/equipment/registerProcess', function(request, response){
+	if(request.session.user) {
+		var body=request.body;
+		var file=request.files.file;
+		var no=0;
 	
-	pool.getConnection(function(err, connection){
-		var sql="SELECT EQUIPMENT_NUM FROM EQUIPMENT_INFO WHERE EQUIPMENT_SERIAL=?;";
-		connection.query(sql, [body.serial], function(err, result, fields){
+		pool.getConnection(function(err, connection){
+			var sql="SELECT EQUIPMENT_NUM FROM EQUIPMENT_INFO WHERE EQUIPMENT_SERIAL=?;";
+			connection.query(sql, [body.serial], function(err, result, fields){
+				if(err) {
+					connection.release();
+					response.send('error : '+err);
+				} else {
+					if(result.length){
+						connection.release();
+						response.redirect('/equipment/main');
+					} else {
+						sql="SELECT count(*) AS count FROM EQUIPMENT_INFO;";
+						connection.query(sql, function(err, result, fields){
+							if(err) {
+								connection.release();
+								response.send('error : '+err);
+							} else {
+								no=result[0].count+1;
+								file.mv(`./public/upload/${no}.png`, function(err){
+									if(err) {
+										connection.release();
+										response.send('error : '+err);
+									} else {
+										var data={
+                	        		        	                        'EQUIPMENT_NUM':no,
+                        	                                        		'C_NUM':1,
+		                	                                                'G_NUM':body.kind,
+                		        	                                        'EQUIPMENT_NAME':body.name,
+                                			                                'EQUIPMENT_SERIAL':body.serial,
+                                                			                'PUBLISHER_NAME':body.brand,
+                                                                			'PURCHASE_PRICE':body.price,
+		                                                        	        'PURCHASE_DATE':body.date,
+                		                                                	'EQUIPMENT_PICTURE':`./public/upload/${no}.png`,
+	                                		                                'REMARK':body.remark
+										};
+										sql="INSERT INTO EQUIPMENT_INFO SET ?;";
+										connection.query(sql, data, function(err, result, fields){
+											if(err) {
+												connection.rollback();
+												connection.release();
+												response.send('error : '+err);
+											} else {
+												request.session.qrcode={
+													'equipment_num':no,
+													'name':body.name
+												};
+												response.redirect("/equipment/registerResult");
+											}
+										});
+										
+                                                        		}
+
+								});	
+							}
+						});
+					}
+				}	
+			});
+		});
+	} else {
+		response.redirect('/');
+	}
+});
+app.get('/equipment/registerResult', function(request, response){
+	if(request.session.user) {
+		var qrcode=request.session.qrcode;
+		request.session.qrcode=null;
+
+		var URL=`http://49.50.172.95:80/equipment/detail/${qrcode.equipment_num}`;
+		var opts={
+			'type':'png'
+		};
+		QRCode.toFile(`./public/images/${qrcode.equipment_num}.png`, URL, opts, function(err, url){
 			if(err) {
-				connection.release();
 				response.send('error : '+err);
 			} else {
-				if(result.length){
+				response.render('equipment_registerResult.ejs', {
+					name:request.session.user.name,
+					equipmentNum:qrcode.equipment_num,
+					equipmentName:qrcode.name
+				});
+			}   
+		});
+	} else {
+		response.redirect('/');
+	}
+});
+
+app.post('/equipment/rental', function(request, response){
+	if(request.session.user) {
+		var equipmentID=request.body.equipmentID;
+		var name=request.session.user.name;
+		pool.getConnection(function(err, connection){
+			var sql="SELECT count(*) AS count FROM USER_EQUIPMENT_MAPPING;";
+			connection.query(sql, function(err, result, fields){
+				if(err) {
 					connection.release();
-					response.redirect('/equipment/management/main');
+					response.send('error : '+err);
 				} else {
-					sql="SELECT count(*) AS count FROM EQUIPMENT_INFO;";
-					connection.query(sql, function(err, result, fields){
+					var no=result[0].count+1;
+					sql="SELECT USER_NUM FROM USER_INFO WHERE USER_NAME=?;";
+					connection.query(sql, [name], function(err, result, fields){
 						if(err) {
 							connection.release();
 							response.send('error : '+err);
 						} else {
-							no=result[0].count+1;
-							file.mv(`./public/upload/${no}.png`, function(err){
+							var user_num=result[0].USER_NUM;
+							var data={
+                                		                'MAPPING_NUM':no,
+                                                		'USER_NUM':user_num,
+		                                                'EQUIPMENT_NUM':parseInt(equipmentID)
+		                                        };
+                		                        sql="INSERT INTO USER_EQUIPMENT_MAPPING SET ?;";
+							connection.query(sql, data, function(err, result, fields){
 								if(err) {
+									connection.rollback();
 									connection.release();
 									response.send('error : '+err);
 								} else {
-									var data={
-                        		        	                        'EQUIPMENT_NUM':no,
-                                                                		'C_NUM':1,
-		                                                                'G_NUM':body.kind,
-                		                                                'EQUIPMENT_NAME':body.name,
-                                		                                'EQUIPMENT_SERIAL':body.serial,
-                                                		                'PUBLISHER_NAME':body.brand,
-                                                                		'PURCHASE_PRICE':body.price,
-		                                                                'PURCHASE_DATE':body.date,
-                		                                                'EQUIPMENT_PICTURE':`./public/upload/${no}.png`,
-                                		                                'REMARK':body.remark
-									};
-									sql="INSERT INTO EQUIPMENT_INFO SET ?;";
-									connection.query(sql, data, function(err, result, fields){
+									connection.commit();
+									sql="SELECT count(*) AS count FROM RENTAL_LOG;";
+									connection.query(sql, function(err, result, fields){
 										if(err) {
-											connection.rollback();
 											connection.release();
 											response.send('error : '+err);
 										} else {
-											request.session.qrcode={
-												'equipment_num':no,
-												'name':body.name
+											no=result[0].count+1;
+											var start=moment().format('YYYY-MM-DD');
+											var end=moment().add(14, 'd').format('YYYY-MM-DD');
+											data={
+												'RENT_NUM':no,
+												'C_NUM':1,
+												'USER_NUM':user_num,
+												'EQUIPMENT_NUM':equipmentID,
+												'START_DATE':start,
+												'END_DATE':end,
+												'RETURN_DATE':'0'
 											};
-											response.redirect("/equipment/registerResult");
+											sql="INSERT INTO RENTAL_LOG SET ?;";
+											connection.query(sql, data, function(err, result, fields){
+												if(err) {
+													connection.rollback();
+													connection.release();
+													response.send('error : '+err);
+												} else {
+													connection.commit();
+													connection.release();
+													response.redirect(`/equipment/detail/${equipmentID}`);
+												}
+											});
 										}
 									});
-									
-                                                        	}
-
-							});	
+								}								
+							});
 						}
 					});
 				}
-			}	
-		});
-	});
-});
-app.get('/equipment/registerResult', function(request, response){
-	var qrcode=request.session.qrcode;
-	request.session.qrcode=null;
-
-	var URL=`http://49.50.172.95:80/equipment/detail/${qrcode.equipment_num}`;
-	var opts={
-		'type':'png'
-	};
-	QRCode.toFile(`./public/images/${qrcode.equipment_num}.png`, URL, opts, function(err, url){
-		if(err) {
-			response.send('error : '+err);
-		} else {
-			response.render('equipment_registerResult.ejs', {
-				name:request.session.user.name,
-				equipmentNum:qrcode.equipment_num,
-				equipmentName:qrcode.name
 			});
-		}   
-	});
-});
+		});
 
-app.get('/equipment/detail/:equipmentID', function(request, response){
-	var test=request.params.equipmentID;
-	response.render('test.ejs', {test:test});
+	} else {
+		response.redirect('/');
+	}
 });
 
 module.exports = app;

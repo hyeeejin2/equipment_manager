@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<head>
+        <title>과업지향</title>
+</head>
+<body>
+	<p>
+		<h2>
+			<a href="/">과업지향</a>
+			<a href="/notice/main">공지사항</a>
+		<% if(locals.name){ %>
+			<%=name%>님
+			<a href="/logout">로그아웃</a>
+		<%} else {%>
+			<a href="/signup">회원가입</a>
+			<a href="/login">로그인</a>
+		<%}%>
+		</h2>
+	</p>
+        <!--<form action="" method="POST">-->
+                <p>
+			분류 <input type="text" id="kind" name="kind" value="<%=result.G_NAME%>" readonly>
+		</p>
+		<p>
+                        비품명 <input type="text" id="title" name="title" value="<%=result.EQUIPMENT_NAME%>" readonly>
+		</p>
+		<p>
+		<% if(locals.equipmentID) {%>
+			<img src='./upload/<%=equipmentID%>.png'>
+		<%}%>
+		</p>
+		<p>
+                        시리얼 번호  <input type="text" value="<%=result.EQUIPMENT_SERIAL%>" readonly>
+                </p>
+                <p>
+			브랜드 <input type="text" value="<%=result.PUBLISHER_NAME%>" readonly>
+                </p>
+                <p>
+			구매일자 <input type="text" value="<%=result.PURCHASE_DATE%>" readonly>
+                </p>
+		<p>
+			구매가격 <input type="number" value="<%=result.PURCHASE_PRICE%>" readonly>
+		</p>
+		<p>
+			<% if(rentalState) {%>
+			대여 상태 <input type="text" value="<%=rentalState%>" readonly><br>
+			<%}%>
+		<% if (locals.startday && locals.returnday && locals.day) { %>
+			대여 시작일 <input type="text" value="<%=startday%>" readonly><br>
+			반납 예정일 <input type="text" value="<%=returnday%>" readonly>
+			<% if(locals.overdue) {%>
+			D+<%=day%>
+			<%} else {%>
+			D-<%=day%>
+			<%}%>
+		<%}%>
+			<% if(locals.rental) {%>
+			<form action="/equipment/rental" method="POST">
+				<input type="submit" value="대여">
+				<input type="text" name="equipmentID" value="<%=equipmentID%>" hidden>
+			</form>
+			<%}%>
+		</p>
+		<p>
+			비고 <input type="text" value="<%=result.REMARK%>" readonly>
+		</p>
+                <p>
+                        <input type="button" id="hiddenList" value="목록" onclick="location.href='/notice/main'" hidden>
+                        <input type="submit" id="hiddenModify" value="수정완료" hidden>
+                        <input type="text" id="equipmentID" name="equipmentID" value="<%=equipmentID%>" hidden>
+                </P>
+        <!--</form>-->
+        <p>
+        <% if(locals.name) {%>
+                <form action="" method="POST">
+                        <input type="submit" id="delete" value="삭제">
+                        <input type="text" name="equipmentID" value="<%=equipmentID%>" hidden>
+        <%}%>
+                <input type="button" id="list" value="목록" onclick="location.href='/equipment/main'">
+        <% if(locals.name) {%>
+                <input type="button" id="modify" value="수정">
+        <%}%>
+</form>
+        </p>
+</body>
+<!--
+<script>
+$('#modify').on('click', function(){
+        $('#title').attr("readonly", false);
+        $('#content').attr("readonly", false);
+        $('#delete').attr("hidden", true);
+        $('#list').attr("hidden", true);
+        $('#modify').attr("hidden", true);
+        $('#hiddenList').attr("hidden", false);
+        $('#hiddenModify').attr("hidden", false);
+});
+</script>
+-->
+</html>
+
