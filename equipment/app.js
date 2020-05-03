@@ -266,50 +266,50 @@ app.get('/notice/listProcess', function(request, response){
 });  	
 
 app.get('/notice/detail/:noticeID', function(request, response){
-	var noticeID=[request.params.noticeID];
-	pool.getConnection(function(err, connection){
-		var sql="SELECT EXISTS (SELECT * FROM NOTICE_INFO WHERE notice_num=?) AS success;";
-		connection.query(sql, noticeID, function(err, result, fields){
-			if(err) {
-				connection.release();
-			        response.send('error : '+err);
-			} else {
-				if(!result[0].success) {
+	if(request.session.user) {
+		var noticeID=[request.params.noticeID];
+		pool.getConnection(function(err, connection){
+			var sql="SELECT EXISTS (SELECT * FROM NOTICE_INFO WHERE notice_num=?) AS success;";
+			connection.query(sql, noticeID, function(err, result, fields){
+				if(err) {
 					connection.release();
-					response.redirect("/notice/main");
+				        response.send('error : '+err);
 				} else {
-					sql="UPDATE NOTICE_INFO SET views = views+1 WHERE notice_num=?;";
-					connection.query(sql, noticeID, function(err, result, fields){
-						if(err) {
-							connection.rollback();
-					                connection.release();
-							response.send('error : '+err);
-						} else {
-							connection.commit();
-							sql="SELECT notice_title, user_name, reporting_date, notice_content FROM NOTICE_INFO, USER_INFO WHERE USER_INFO.user_num=NOTICE_INFO.user_num and notice_num=?;";
-							connection.query(sql, noticeID, function(err, result, fields){
-								if(err) {
-									connection.release();
-									response.send('error : '+err);
-								} else {
-									connection.release();
-									if(request.session.user) {
+					if(!result[0].success) {
+						connection.release();
+						response.redirect("/notice/main");
+					} else {
+						sql="UPDATE NOTICE_INFO SET views = views+1 WHERE notice_num=?;";
+						connection.query(sql, noticeID, function(err, result, fields){
+							if(err) {
+								connection.rollback();
+						                connection.release();
+								response.send('error : '+err);
+							} else {
+								connection.commit();
+								sql="SELECT notice_title, user_name, reporting_date, notice_content FROM NOTICE_INFO, USER_INFO WHERE USER_INFO.user_num=NOTICE_INFO.user_num and notice_num=?;";
+								connection.query(sql, noticeID, function(err, result, fields){
+									if(err) {
+										connection.release();
+										response.send('error : '+err);
+									} else {
+										connection.release();
 										response.render('notice_detail', {
 											name:request.session.user.name,
 											result:result[0],
 											noticeID:noticeID
 										});
-									} else {
-										response.render('notice_detail', {result:result[0]});
 									}
-								}
-							});
-						}
-					});
+								});
+							}
+						});
+					}
 				}
-			}
-		});	
-	});
+			});	
+		});
+	} else {
+		response.redirect('/');
+	}
 });
 
 app.get('/notice/write', function(request, response){
@@ -431,7 +431,32 @@ app.get('/equipment/main', function(request, response){
 		response.redirect('/');
 	}
 });
-
+app.get('/equipment/listProcess', function(request, response){
+	pool.getConnection(function(err, connection){
+		var sql='SELECT G_NUM, EQUIPMENT_NAME, EQUIPMENT_PICTURE FROM EQUIPMENT_INFO;';
+                connection.query(sql, function(err, result, fields){
+                        if(err) {
+                                connection.release();
+                                response.send('error : '+err);
+                        } else {
+                                connection.release();
+                                var dataList=[];
+                                for(var i=0;i<result.length;i++)
+                                {
+                                        var temp={
+                                                'equipment_kind':result[i].G_NUM,
+                                                'equipment_num':i+1,
+						'equipment_picture':result[i].EQUIPMENT_PICTURE,
+                                                'equipment_name':result[i].EQUIPMENT_NAME
+                                        };
+                                        dataList.push(temp);
+                                }
+                                var json={'data':dataList};
+                                response.send(json);
+                        }
+                });
+        });
+});
 app.get('/equipment/detail/:equipmentID', function(request, response){
 	if(request.session.user){
 		var equipmentID=[request.params.equipmentID];
@@ -570,7 +595,7 @@ app.post('/equipment/registerProcess', function(request, response){
                                                 			                'PUBLISHER_NAME':body.brand,
                                                                 			'PURCHASE_PRICE':body.price,
 		                                                        	        'PURCHASE_DATE':body.date,
-                		                                                	'EQUIPMENT_PICTURE':`./public/upload/${no}.png`,
+                		                                                	'EQUIPMENT_PICTURE':`./upload/${no}.png`,
 	                                		                                'REMARK':body.remark
 										};
 										sql="INSERT INTO EQUIPMENT_INFO SET ?;";

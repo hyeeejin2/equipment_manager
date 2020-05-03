@@ -1,21 +1,62 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>과업지향</title> 
+        <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+        <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.css">
+   <link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css">
+        <title>과업지향</title>
 </head>
 <body>
-	<p>
-		<h2>
-		<% if(locals.name){ %>
-			<a href="/">과업지향</a>
-         <a href="/notice/main">공지사항</a>
-         <%=name%>님
-         <a href="/logout">로그아웃</a>
-		<%}%>
-		</h2>
-	</p>
-	<p>
-		<a href="/equipment/register">비품 등록</a>
-	</p>
+        <p>
+                <h2>
+                        <a href="/">과업지향</a>
+                        <a href="/notice/main">공지사항</a>
+                <% if(locals.name){ %>
+                        <%=name%>님
+                        <a href="/logout">로그아웃</a>
+                <%} else {%>
+                        <a href="/signup">회원가입</a>
+                        <a href="/login">로그인</a>
+                <%}%>
+                </h2>
+        </p>
+        <p>
+                <h2>비품 목록</h2>
+        </p>
+	 <p>
+                <a href="/equipment/register">비품 등록</a>
+        </p>
+        <table id="equipmentList" class="table table-striped table-bordered" style="width:100%">
+                <thead>
+                        <tr>
+                                <th>번호</th>
+				<th>비품 사진<th>
+                                <th>비품명</th>
+                                <th>대여 상태</th>
+                        </tr>
+        </table>
 </body>
+<script>
+var table=$('#equipmentList').DataTable({
+   ajax:{
+        url:'http://49.50.172.95/equipment/listProcess',
+        dataSrc:'data'
+   },
+        columns:[{data:'equipment_num'},
+		 {
+			data:'equipment_picture',
+		 	render:function(equipment_picture){
+			return '<img src='+equipment_picture+'>';
+		 	}
+		 },
+                 {data:'equipment_name'}]
+});
+$('#equipmentList').on('click', 'tr', function(){
+        var equipmentID=table.row(this).data().equipment_num;
+        location.href=`/equipment/detail/${equipmentID}`;
+});
+</script>
 </html>
+
