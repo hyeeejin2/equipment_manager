@@ -376,7 +376,6 @@ app.post('/notice/writeProcess', function(request, response){
 	}
 });
 
-
 app.post('/notice/modifyProcess', function(request, response){
 	if(request.session.user) {
 		var body=request.body;
@@ -400,7 +399,6 @@ app.post('/notice/modifyProcess', function(request, response){
 		response.redirect('/');
 	}   
 });
-
 app.post('/notice/deleteProcess', function(request, response){
 	if(request.session.user) {
 		var noticeID=[request.body.noticeID];
